@@ -1,0 +1,52 @@
+I used Ubuntu 12.10 to prepare kernel image and linaro sd card for UG802.
+
+Cross toolchain installation:
+
+sudo apt-get install binutils-arm-linux-gnueabihf gcc-arm-linux-gnueabihf git git-core
+
+Build kernel:
+
+./buildkernel.sh
+
+Download linaro rootfs:
+
+wget https://releases.linaro.org/13.02/ubuntu/quantal-images/alip/linaro-quantal-alip-20130227-290.tar.gz
+
+Unpack it:
+
+sudo tar zxf linaro-quantal-alip-20130227-290.tar.gz
+
+Create two partitions on sdcard, first partition must be 16MB. Format first partiton to vfat:
+
+sudo mkfs.vfat /dev/sdX1
+
+Format second partition to ext4:
+
+sudo mkfs.ext4 /dev/sdX2
+
+Rootfs will installed to second partition. Copy mount sd card second partition and copy rootfs:
+
+sudo mount /dev/sdX2 /mnt
+
+cd binary
+sudo cp -ax . /mnt/
+cd ..
+
+Copy kernel modules:
+
+sudo cp -R kernel-out/lib /mnt/
+
+Install firmware for Asus N10 (optional):
+
+sudo mkdir /mnt/lib/firmware/rtlwifi
+sudo cp /lib/firmware/rtlwifi/rtl8712u.bin /mnt/lib/firmware/rtlwifi
+
+Remove rootfs unpacked binaries:
+
+sudo rm -rf binary
+
+Unmount sdcard:
+
+sudo umount /mnt
+
+First partition added to SD for compatibility with Allwinner devices and currently unused.

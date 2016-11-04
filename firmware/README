@@ -1,0 +1,5 @@
+RATBOT FIRMWARE
+
+Ardubot used as platform and PINGUINO-MX-220 as control board. Ardubot needs
+little modification - cut the wire from PIN D9 and solder it to D7, because
+D9 used by hid bootloader.
