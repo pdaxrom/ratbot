@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 {
     char buf[BUF_SIZE];
     int r;
-    tcp_channel *server = tcp_open(TCP_CLIENT, "127.0.0.1", 9998);
+    tcp_channel *server = tcp_open(TCP_SSL_CLIENT, "127.0.0.1", 9998);
     if (!server) {
 	fprintf(stderr, "tcp_open()\n");
 	return -1;

@@ -5,25 +5,26 @@ AR	 = $(CROSS)ar
 RANLIB	 = $(CROSS)ranlib
 
 CFLAGS   = -Wall -g -I.. -DDEBUG
+CFLAGS   += -DCONFIG_DIR=\"$(PWD)/cert\"
 LDFLAGS  = -g
-LIBS     = -lssl
+LIBS     = -lssl -lcrypto
 
 ifeq (Linux, $(SYSTEM))
-APPS     = udpserver udpclient udpchat tcpserver tcpclient
+APPS     = udpserver udpclient udpchat tcpserver tcpclient tcpsslserver tcpsslclient
 endif
 ifeq (mingw32, $(SYSTEM))
 EXE      = .exe
-APPS     = udpserver$(EXE) udpclient$(EXE) udpchat$(EXE) tcpserver$(EXE) tcpclient$(EXE)
+APPS     = udpserver$(EXE) udpclient$(EXE) udpchat$(EXE) tcpserver$(EXE) tcpclient$(EXE) tcpsslserver$(EXE) tcpsslclient$(EXE)
 LIBS     += -lwsock32
 endif
 ifeq (Darwin, $(SYSTEM))
-APPS     = udpserver udpclient udpchat tcpserver tcpclient
+APPS     = udpserver udpclient udpchat tcpserver tcpclient tcpsslserver tcpsslclient
 ifeq (Linux, $(BUILD))
 CFLAGS  += -I/opt/i686-apple-darwin10/sysroot/Developer/Headers/FlatCarbon
 endif
 endif
 ifeq (Android, $(SYSTEM))
-APPS     = udpserver udpclient udpchat tcpserver tcpclient
+APPS     = udpserver udpclient udpchat tcpserver tcpclient tcpsslserver tcpsslclient
 ACFLAGS += --sysroot ${ANDROID_NDK}/build/platforms/android-4/arch-arm -fPIC -mandroid -DANDROID -DOS_ANDROID
 CFLAGS  += $(ACFLAGS)
 LDFLAGS += $(ACFLAGS)
@@ -44,6 +45,12 @@ tcpserver$(EXE): tcpserver.o ../tcp.o
 	$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 tcpclient$(EXE): tcpclient.o ../tcp.o
+	$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+tcpsslserver$(EXE): tcpsslserver.o ../tcp.o
+	$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+tcpsslclient$(EXE): tcpsslclient.o ../tcp.o
 	$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 clean:

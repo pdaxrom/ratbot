@@ -66,15 +66,22 @@ static int winsock_init(void)
 }
 #endif
 
+#define PUB_EXP 65537
+
 static RSA *ssl_genkey(SSL *ssl_connection, int export, int key_length)
 {
-    static RSA *key = NULL;
-
-    if (key == NULL) {
-	if ((key = RSA_generate_key(export ? key_length : 1024, RSA_F4, NULL, NULL)) == NULL)
-	    fprintf(stderr, "Failed to generate temporary key.\n");
+    RSA *key = NULL;
+    BIGNUM *bne = BN_new();
+    int ret = BN_set_word(bne, PUB_EXP);
+    if (ret == 1) {
+	key = RSA_new();
+	ret = RSA_generate_key_ex(key, export ? key_length : 1024, bne, NULL);
+	if (ret != 1) {
+	    RSA_free(key);
+	    key = NULL;
+	}
+	BN_free(bne);
     }
-
     return key;
 }
 
@@ -92,7 +99,7 @@ SSL_CTX *ssl_initialize(void)
     SSL_load_error_strings();
 
     /* 1. initialize context */
-    if ((ssl_context = SSL_CTX_new(SSLv3_method())) == NULL) {
+    if ((ssl_context = SSL_CTX_new(TLS_method())) == NULL) {
 	fprintf(stderr, "Failed to initialize SSL context.\n");
 	return NULL;
     }
@@ -131,8 +138,8 @@ static SSL_CTX *ssl_client_initialize(void)
     SSL_library_init();
     SSL_load_error_strings();
     OpenSSL_add_all_algorithms();
-    SSL_METHOD *meth;
-    meth = SSLv3_client_method();
+    static const SSL_METHOD *meth;
+    meth = TLS_client_method();
     ctx = SSL_CTX_new(meth);
 
     if (!ctx) {
@@ -155,7 +162,7 @@ tcp_channel *tcp_open(int mode, const char *addr, int port)
 #endif
 
     tcp_channel *u = (tcp_channel *)malloc(sizeof(tcp_channel));
-    memset(u, 0, sizeof(u));
+    memset(u, 0, sizeof(tcp_channel));
 
     u->mode = mode;
 
